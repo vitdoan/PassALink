@@ -1,12 +1,9 @@
 import React from "react";
 
-function Rank(){
+function Rank({name,entries}){
     return <div className="">
         <div className="gray f3 center">
-            {'Vi your current rank is...'}
-        </div>
-        <div className="gray f2 center">
-            {'#3'}
+            {`${name}, your current entry count is ${entries}`}
         </div>
     </div>
 }

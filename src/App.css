@@ -4,10 +4,6 @@
   padding-right: 20px;
 }
 
-.Tilty {
-
-}
-
 .Tilty img {
   width: 70px;
   display: flex;
@@ -18,9 +14,4 @@
 .center {
   display: flex;
   justify-content: center;
-}
-
-.displayImg {
-  width: 400px;
-  padding-top: 10px;
 }

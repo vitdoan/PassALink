@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Component, useState } from 'react';
 import Navigation from './components/Navigation/navigation';
 import Logo from './components/Logo/logo';
 import ImageLinkForm from './components/ImageLinkForm/imageLinkForm'
@@ -6,53 +6,157 @@ import Rank from './components/Rank/rank'
 import './App.css';
 import 'tachyons';
 import Clarifai from 'clarifai'
-import FaceRec from './components/FaceRec/faceReg';
+import FaceRec from './components/FaceRec/faceRec';
+import SignIn from './components/SignIn/SignIn';
+import Register from './components/Register/Register';
 
+const app = new Clarifai.App({
+  apiKey: 'a5feb8dee5be409c83b4c4fc008994c8'
+ });
 
-function App() {
-  let [state,setState] = useState({
-    input:'',
-    imageURL:''
-  });
+class App extends Component {
+  constructor(){
+    super();
+    this.state = {
+      input: '',
+      imageURL: '',
+      box:{},
+      route:'signIn',
+      isSignedIn:false,
+      user:{
+        id: 7463,
+        name: '',
+        email: '',
+        password: '',
+        entries: 0,
+        joined: ''
+      }
+    }
+  }
 
-  const app = new Clarifai.App({
-    apiKey: 'a5feb8dee5be409c83b4c4fc008994c8'
-   });
+  loadUser = (data) => {
+    this.setState({user:{
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      entries: data.entries,
+      joined: data.joined
+    }})
+  }
 
-  const onInputChange = (event) => {
+//   componentDidMount(){
+//     fetch('http://localhost:3000/')
+//     .then(response=>response.json())
+//     .then(console.log)
+// }
+
+  onInputChange = (event) => {
     let userInput = event.target.value;
-    setState((prev)=>(
-      {
-        input:userInput,
-        imageURL:prev.imageURL
-      }));
+    this.setState({input:userInput})
   };
-  const onSubmit = () => {
-    setState((prev)=>(
-      {
-        imageURL:prev.input
-      }));
-    app.models.predict( Clarifai.FACE_DETECT_MODEL,
-      state.input
+
+  onSomeSubmit = () => {
+    this.setState({imageURL: this.state.input});
+    app.models
+      .predict(
+        Clarifai.FACE_DETECT_MODEL,
+        this.state.input
       )
-      .then((response) => {
-      console.log(response.outputs[0].data);
+      .then(response => {
+        if (response) {
+          fetch('http://localhost:3000/image', {
+            method: 'put',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              id: this.state.user.id
+            })
+          })
+            .then(response => response.json())
+            .then(count => {
+              this.setState(Object.assign(this.state.user, { entries: count.entries}))
+            })
+        }
+        this.displayFaceBox(this.calFaceLocation(response));
       })
+      .catch(err => console.log(err));
+  }
+  onSubmit = () => {
+    this.setState({imageURL: this.state.input});
+    app.models.predict( Clarifai.FACE_DETECT_MODEL,
+      this.state.input)
+      .then((response) => { 
+      if(response){
+        fetch('http://localhost:3000/image',{
+          method:'put',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+          id:this.state.user.id
+          })
+        })
+        .then(res=>res.json()).then(data=>{
+          this.setState({
+          ...this.state,
+          user:{
+            ...this.state.user,
+            entries:data.entries
+          }
+        })})
+      }
+      this.displayFaceBox(this.calFaceLocation(response));
+    })
       .catch((err) => {
-      console.log(err);
+        console.log(err);
       });
-      };    
+  };    
 
+  calFaceLocation = (response) => {
+    const face = response.outputs[0].data.regions[0].region_info.bounding_box;
+    const image = document.getElementById('inputImage');
+    const width = Number(image.width);
+    const height = Number(image.height);
+    return {
+      leftCol: face.left_col*width,
+      topRow: face.top_row*height,
+      rightCol: width-(face.right_col*width),
+      bottomRow: height-(face.bottom_row*height),
+    }
+  }
 
-  return (
-    <div className="App">
-      <Navigation />
-      <Logo />
-      <Rank />
-      <ImageLinkForm onSubmit={onSubmit} onInputChange={onInputChange} />
-      <FaceRec imageURL={state.imageURL}/>
-    </div>
-  );
+  displayFaceBox = (box) => {
+    console.log(box);
+    this.setState({box:box})
+  }
+
+  onRouteChange = (route) => {
+    if(route === 'signOut'){
+      this.setState({isSignedIn:false})
+    } else if (route === 'home'){
+      this.setState({isSignedIn:true})
+    }
+    this.setState({route:route})
+  }
+
+  render(){
+    const {imageURL,box,route,isSignedIn} = this.state;
+    return (
+      <div className="App">
+        <Navigation isSignedIn={isSignedIn} onRouteChange={this.onRouteChange} />
+        {(route==='home') ? 
+        <div>
+        <Logo />
+        <Rank name={this.state.user.name} entries={this.state.user.entries}/>
+        <ImageLinkForm onSubmit={this.onSubmit} onInputChange={this.onInputChange} />
+        <FaceRec box={box} imageURL={imageURL}/>
+        </div>
+        : ((route==='signIn') ?
+        <SignIn loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
+        : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
+        )
+        }
+      </div>
+    );
+  }
+  
 }
 
 export default App;
