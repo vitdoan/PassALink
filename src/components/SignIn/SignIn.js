@@ -25,7 +25,7 @@ class SignIn extends Component {
       })
     }).then(response=>response.json())
     .then(data=>{
-      if(true){
+      if(data.id){
         console.log("DATA ISSS IDDD: "+data.id);
         console.log("USER DATA IS:"+data);
         this.props.loadUser(data);
