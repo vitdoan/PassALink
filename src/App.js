@@ -9,6 +9,7 @@ import Clarifai from 'clarifai'
 import FaceRec from './components/FaceRec/faceRec';
 import SignIn from './components/SignIn/SignIn';
 import Register from './components/Register/Register';
+import Ingrdient from './components/ingredientList/ingredient';
 
 const app = new Clarifai.App({
   apiKey: 'a5feb8dee5be409c83b4c4fc008994c8'
@@ -23,6 +24,7 @@ class App extends Component {
       box:{},
       route:'signIn',
       isSignedIn:false,
+      ingredients:[],
       user:{
         id: 7463,
         name: '',
@@ -55,37 +57,13 @@ class App extends Component {
     this.setState({input:userInput})
   };
 
-  onSomeSubmit = () => {
-    this.setState({imageURL: this.state.input});
-    app.models
-      .predict(
-        Clarifai.FACE_DETECT_MODEL,
-        this.state.input
-      )
-      .then(response => {
-        if (response) {
-          fetch('http://localhost:3000/image', {
-            method: 'put',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-              id: this.state.user.id
-            })
-          })
-            .then(response => response.json())
-            .then(count => {
-              this.setState(Object.assign(this.state.user, { entries: count.entries}))
-            })
-        }
-        this.displayFaceBox(this.calFaceLocation(response));
-      })
-      .catch(err => console.log(err));
-  }
   onSubmit = () => {
     this.setState({imageURL: this.state.input});
-    app.models.predict( Clarifai.FACE_DETECT_MODEL,
+    app.models.predict( Clarifai.FOOD_MODEL,
       this.state.input)
       .then((response) => { 
       if(response){
+        console.log(response);
         fetch('http://localhost:3000/image',{
           method:'put',
           headers:{'Content-Type':'application/json'},
@@ -102,30 +80,42 @@ class App extends Component {
           }
         })})
       }
-      this.displayFaceBox(this.calFaceLocation(response));
+      // this.displayFaceBox(this.calFaceLocation(response));
+      this.listIngredients(response);
     })
       .catch((err) => {
         console.log(err);
       });
   };    
 
-  calFaceLocation = (response) => {
-    const face = response.outputs[0].data.regions[0].region_info.bounding_box;
-    const image = document.getElementById('inputImage');
-    const width = Number(image.width);
-    const height = Number(image.height);
-    return {
-      leftCol: face.left_col*width,
-      topRow: face.top_row*height,
-      rightCol: width-(face.right_col*width),
-      bottomRow: height-(face.bottom_row*height),
-    }
+  listIngredients = (response) => {
+    const ingredientArr = response.outputs[0].data.concepts.slice(0,8);
+    console.log(ingredientArr);
+    let ingredientAndPercent = ingredientArr.map(x=>(
+      {
+        ingredient:x.name,
+        percent:Math.round(x.value*100)
+      }))
+    let newArr = ingredientArr.map(x=>x.name);
+    this.setState({ingredients:ingredientAndPercent});
   }
+  // calFaceLocation = (response) => {
+  //   const face = response.outputs[0].data.regions[0].region_info.bounding_box;
+  //   const image = document.getElementById('inputImage');
+  //   const width = Number(image.width);
+  //   const height = Number(image.height);
+  //   return {
+  //     leftCol: face.left_col*width,
+  //     topRow: face.top_row*height,
+  //     rightCol: width-(face.right_col*width),
+  //     bottomRow: height-(face.bottom_row*height),
+  //   }
+  // }
 
-  displayFaceBox = (box) => {
-    console.log(box);
-    this.setState({box:box})
-  }
+  // displayFaceBox = (box) => {
+  //   console.log(box);
+  //   this.setState({box:box})
+  // }
 
   onRouteChange = (route) => {
     if(route === 'signOut'){
@@ -147,6 +137,7 @@ class App extends Component {
         <Rank name={this.state.user.name} entries={this.state.user.entries}/>
         <ImageLinkForm onSubmit={this.onSubmit} onInputChange={this.onInputChange} />
         <FaceRec box={box} imageURL={imageURL}/>
+        <Ingrdient listIngredients={this.state.ingredients}/>
         </div>
         : ((route==='signIn') ?
         <SignIn loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>

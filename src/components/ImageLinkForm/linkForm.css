@@ -1,13 +1,16 @@
-.imgForm {
-}
-
 .inputField {
 	width: 500px;
-	background-color: #e5e5f7;
 	opacity: 0.7;
-	background: linear-gradient(135deg, #74e6fc55 25%, transparent 25%) -10px 0/
-			20px 20px,
-		linear-gradient(225deg, #74e6fc 25%, transparent 25%) -10px 0/ 20px 20px,
-		linear-gradient(315deg, #74e6fc55 25%, transparent 25%) 0px 0/ 20px 20px,
-		linear-gradient(45deg, #74e6fc 25%, #e5e5f7 25%) 0px 0/ 20px 20px;
+	background-color: #FAFDD6;
+}
+.inputField button, .inputField input{
+	border: solid 1px rgb(204, 204, 204);
+	box-shadow: rgba(27, 31, 35, 0.04) 0px 1px 0px, rgba(255, 255, 255, 0.25) 0px 1px 0px inset;
+}
+.inputField button{
+	margin-left: -1px;
+	cursor: pointer;
+}
+.inputField button:active{
+	opacity: 0.8;
 }

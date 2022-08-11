@@ -3,6 +3,12 @@
   justify-content: right;
   padding-right: 20px;
 }
+.NavBar p {
+  border-radius: 2px;
+  margin-left: 20px;
+  border: solid;
+  padding: 8px 12px;
+}
 
 .Tilty img {
   width: 70px;
@@ -14,4 +20,23 @@
 .center {
   display: flex;
   justify-content: center;
+}
+
+body {
+  background: linear-gradient(-45deg, #FFB3B3, #FFDBA4, #C1EFFF, #FFE9AE);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+  height: 100vh;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
