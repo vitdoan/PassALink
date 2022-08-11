@@ -51,7 +51,7 @@ class Register extends Component {
       <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
         <legend className="f2 fw6 ph0 mh0">Register</legend>
         <div className="mt3">
-          <label className="db fw6 lh-copy f6" htmlFor="email-address">Name</label>
+          <label className="db fw6 lh-copy f6" htmlFor="text">Name</label>
           <input 
             onChange={this.onNameChange}
             className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" 
@@ -60,7 +60,7 @@ class Register extends Component {
             id="userName"/>
         </div>
         <div className="mt3">
-          <label className="db fw6 lh-copy f6" htmlFor="email-address">Email</label>
+          <label className="db fw6 lh-copy f6" htmlFor="text">Username</label>
           <input 
             onChange={this.onEmailChange}
             className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" 

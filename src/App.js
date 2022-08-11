@@ -96,7 +96,6 @@ class App extends Component {
         ingredient:x.name,
         percent:Math.round(x.value*100)
       }))
-    let newArr = ingredientArr.map(x=>x.name);
     this.setState({ingredients:ingredientAndPercent});
   }
   // calFaceLocation = (response) => {
